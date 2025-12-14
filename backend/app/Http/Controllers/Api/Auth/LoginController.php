@@ -26,7 +26,22 @@ class LoginController extends Controller
             'success' => true,
             'message' => 'Login Berhasil!',
             'token' => $token,
+            'user' => [
+            'id' => $user->id,
+            'email' => $user->email,
+            'role_id' => $user->role_id,
+        ],
             'session_id' => session()->getId(),
         ]);
+    }
+
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Logout berhasil'
+        ], 200);
     }
 }

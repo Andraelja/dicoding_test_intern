@@ -1,31 +1,37 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { api } from '@/lib/api';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { api } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleLogin = async () => {
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
-      const res = await api.post('/login', {
+      const res = await api.post("/login", {
         email,
         password,
       });
+      const { token, user } = res.data;
 
-      localStorage.setItem('token', res.data.token);
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
 
-      router.push('/admin/vacancies');
+      if (user.role_id === 2) {
+        router.push("/jobs");
+      } else {
+        router.push("/admin/vacancies");
+      }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Login gagal');
+      setError(err.response?.data?.message || "Login gagal");
     } finally {
       setLoading(false);
     }
@@ -34,9 +40,7 @@ export default function LoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-50">
       <div className="w-full max-w-md rounded-xl border bg-white p-6">
-        <h1 className="mb-6 text-center text-2xl font-bold">
-          Login Admin
-        </h1>
+        <h1 className="mb-6 text-center text-2xl font-bold">Login Admin</h1>
 
         {error && (
           <div className="mb-4 rounded bg-red-100 p-3 text-sm text-red-600">
@@ -66,7 +70,7 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full rounded bg-black py-2 text-white disabled:opacity-50"
           >
-            {loading ? 'Loading...' : 'Login'}
+            {loading ? "Loading..." : "Login"}
           </button>
         </div>
       </div>
