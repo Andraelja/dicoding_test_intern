@@ -98,7 +98,11 @@ export default function AdminVacanciesPage() {
                 </div>
 
                 <div className="flex-1">
-                  <h3 className="font-semibold">{job.title}</h3>
+                  <Link href={`/admin/vacancies/detail/${job.id}`}>
+                    <h3 className="font-semibold hover:underline cursor-pointer">
+                      {job.title}
+                    </h3>
+                  </Link>
                   <p className="mt-1 text-xs text-gray-500">
                     Dibuat: {job.created_at} · Aktif hingga: {job.active_until}
                   </p>

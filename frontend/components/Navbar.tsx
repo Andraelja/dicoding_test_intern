@@ -8,7 +8,7 @@ export default function Navbar() {
   const pathname = usePathname();
 
   const menu = [
-    { name: "Lowongan Kerja", href: "/jobs" },
+    { name: "Lowongan Kerja", href: "/admin/jobs" },
     { name: "Dashboard", href: "/admin/vacancies" },
   ];
 
