@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import JobDescriptionEditor from "@/components/JobDescriptionEditor";
@@ -27,10 +27,14 @@ type FormData = {
   min_experience: string;
 };
 
-export default function CreateVacancyPage() {
+export default function EditVacancyPage() {
   const router = useRouter();
+  const params = useParams();
+  const vacancyId = params.id as string;
+
   const [positions, setPositions] = useState<Position[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingData, setLoadingData] = useState(true);
   const [error, setError] = useState("");
 
   const [formData, setFormData] = useState<FormData>({
@@ -61,6 +65,70 @@ export default function CreateVacancyPage() {
     loadPositions();
   }, []);
 
+  useEffect(() => {
+    const loadVacancy = async () => {
+      try {
+        setLoadingData(true);
+        const res = await api.get(`/vacancies/${vacancyId}`);
+        const vacancy = res.data.data;
+
+        console.log("Data vacancy:", vacancy);
+
+        let formattedDate = "";
+        if (vacancy.active_until) {
+          const dateStr = vacancy.active_until;
+          const months: { [key: string]: string } = {
+            Jan: "01",
+            Feb: "02",
+            Mar: "03",
+            Apr: "04",
+            May: "05",
+            Jun: "06",
+            Jul: "07",
+            Aug: "08",
+            Sep: "09",
+            Oct: "10",
+            Nov: "11",
+            Dec: "12",
+          };
+
+          const parts = dateStr.split(" ");
+          if (parts.length === 3) {
+            const day = parts[0].padStart(2, "0");
+            const month = months[parts[1]];
+            const year = parts[2];
+            formattedDate = `${year}-${month}-${day}`;
+          }
+        }
+
+        setFormData({
+          title: vacancy.title || "",
+          position_id: vacancy.position?.id?.toString() || "",
+          job_type: vacancy.job_type || "",
+          quota: vacancy.quota?.toString() || "",
+          active_until: formattedDate,
+          location: vacancy.location || "",
+          is_remote: vacancy.is_remote || false,
+          description: vacancy.description || "",
+          min_salary: vacancy.min_salary || null,
+          max_salary: vacancy.max_salary || null,
+          is_show_salary: vacancy.is_show_salary ?? true,
+          min_experience: vacancy.min_experience || "",
+        });
+
+        setLoadingData(false);
+      } catch (err: any) {
+        console.error("Error loading vacancy:", err);
+        setError("Gagal memuat data lowongan");
+        setLoadingData(false);
+      }
+    };
+
+    if (vacancyId) {
+      loadVacancy();
+    }
+  }, [vacancyId]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -76,13 +144,17 @@ export default function CreateVacancyPage() {
         location: formData.location,
         is_remote: formData.is_remote,
         description: formData.description,
-        min_salary: formData.min_salary,
-        max_salary: formData.max_salary,
+        min_salary: formData.min_salary || 0,
+        max_salary: formData.max_salary || 0,
         is_show_salary: formData.is_show_salary,
-        min_experience: formData.min_experience,
+        min_experience: formData.min_experience || null,
       };
 
-      const response = await api.post("/vacancies", payload);
+      console.log("Payload update:", payload);
+
+      const response = await api.put(`/vacancies/${vacancyId}`, payload);
+
+      console.log("Response:", response.data);
 
       if (response.data.success) {
         alert(response.data.message);
@@ -90,11 +162,38 @@ export default function CreateVacancyPage() {
       }
     } catch (err: any) {
       console.error("Error:", err);
-      setError(err.response?.data?.message || "Gagal membuat lowongan");
+      console.error("Error Response:", err.response?.data);
+
+      if (err.response?.data?.errors) {
+        const errorMessages = Object.entries(err.response.data.errors)
+          .map(([field, messages]) => {
+            return `${field}: ${(messages as string[]).join(", ")}`;
+          })
+          .join("\n");
+
+        setError(errorMessages);
+      } else {
+        setError(err.response?.data?.message || "Gagal mengupdate lowongan");
+      }
     } finally {
       setLoading(false);
     }
   };
+
+  if (loadingData) {
+    return (
+      <>
+        <Navbar />
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Memuat data...</p>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>
@@ -103,18 +202,27 @@ export default function CreateVacancyPage() {
       <section className="bg-zinc-900 text-white">
         <div className="mx-auto max-w-4xl px-6 py-12">
           <p className="text-sm text-blue-400 mb-2">Dicoding Jobs</p>
-          <h1 className="text-2xl font-bold">Buat lowongan pekerjaan</h1>
+          <h1 className="text-2xl font-bold">Edit lowongan pekerjaan</h1>
           <p className="mt-2 text-sm text-zinc-300 max-w-xl">
-            Dicoding Jobs menghubungkan industri dengan talenta yang tepat. Buat
-            lowongan dan temukan kandidat terbaik.
+            Update informasi lowongan pekerjaan Anda.
           </p>
         </div>
       </section>
 
       <main className="mx-auto max-w-4xl px-6 py-10">
         {error && (
-          <div className="mb-4 p-4 bg-red-100 text-red-700 rounded">
-            {error}
+          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-start gap-3">
+              <span className="text-red-600 text-xl">⚠️</span>
+              <div className="flex-1">
+                <h3 className="font-semibold text-red-800 mb-1">
+                  Gagal Mengupdate Lowongan
+                </h3>
+                <pre className="text-sm text-red-700 whitespace-pre-wrap">
+                  {error}
+                </pre>
+              </div>
+            </div>
           </div>
         )}
 
@@ -122,7 +230,6 @@ export default function CreateVacancyPage() {
           onSubmit={handleSubmit}
           className="space-y-6 bg-white p-8 rounded-lg"
         >
-          {/* Judul */}
           <div>
             <label className="block text-sm font-medium mb-1">
               Judul lowongan <span className="text-red-500">*</span>
@@ -246,17 +353,12 @@ export default function CreateVacancyPage() {
             </label>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Deskripsi Pekerjaan <span className="text-red-500">*</span>
-            </label>
-            <JobDescriptionEditor
-              value={formData.description}
-              onChange={(value) =>
-                setFormData({ ...formData, description: value })
-              }
-            />
-          </div>
+          <JobDescriptionEditor
+            value={formData.description}
+            onChange={(value) =>
+              setFormData({ ...formData, description: value })
+            }
+          />
 
           <div>
             <label className="block text-sm font-medium mb-2">
@@ -275,11 +377,12 @@ export default function CreateVacancyPage() {
                       e.target.value === "" ? null : Number(e.target.value),
                   })
                 }
+                required
               />
               <input
                 type="number"
                 className="rounded border border-secondary px-3 py-2 text-sm"
-                placeholder="Maximum"
+                placeholder="Maksimum"
                 value={formData.max_salary ?? ""}
                 onChange={(e) =>
                   setFormData({
@@ -288,6 +391,7 @@ export default function CreateVacancyPage() {
                       e.target.value === "" ? null : Number(e.target.value),
                   })
                 }
+                required
               />
             </div>
 
@@ -352,7 +456,7 @@ export default function CreateVacancyPage() {
               disabled={loading}
               className="rounded bg-primary px-4 py-2 text-sm text-white disabled:bg-gray-400"
             >
-              {loading ? "Menyimpan..." : "Buat lowongan"}
+              {loading ? "Menyimpan..." : "Update lowongan"}
             </button>
             <button
               type="button"

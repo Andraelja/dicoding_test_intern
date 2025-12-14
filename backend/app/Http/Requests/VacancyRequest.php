@@ -30,6 +30,10 @@ class VacancyRequest extends FormRequest
             'location' => 'required|string',
             'is_remote' => 'boolean',
             'description' => 'required|string',
+            'min_salary' => 'integer|min:0',
+            'max_salary' => 'integer|gte:min_salary',
+            'is_show_salary' => 'boolean',
+            'min_experience' => 'required|string|max:255',
         ];
     }
 }

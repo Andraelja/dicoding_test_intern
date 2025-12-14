@@ -19,11 +19,16 @@ class Vacancy extends Model
         'location',
         'is_remote',
         'description',
+        'min_salary',
+        'max_salary',
+        'is_show_salary',
+        'min_experience',
     ];
 
     protected $casts = [
         'active_until' => 'date',
         'is_remote' => 'boolean',
+        'is_show_salary' => 'boolean'
     ];
 
     public function position() {

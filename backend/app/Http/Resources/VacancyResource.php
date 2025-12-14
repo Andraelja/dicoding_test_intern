@@ -27,6 +27,10 @@ class VacancyResource extends JsonResource
                 'id' => $this->position->id,
                 'name' => $this->position->name,
             ],
+            'min_salary' => $this->min_salary,
+            'max_salary' => $this->max_salary,
+            'is_show_salary' => $this->is_show_salary,
+            'min_experience' => $this->min_experience,
             'created_at' => $this->created_at?->format('d M Y H:i'),
             'updated_at' => $this->updated_at?->diffForHumans(),
         ];

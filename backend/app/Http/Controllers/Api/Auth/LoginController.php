@@ -26,6 +26,7 @@ class LoginController extends Controller
             'success' => true,
             'message' => 'Login Berhasil!',
             'token' => $token,
+            'session_id' => session()->getId(),
         ]);
     }
 }
