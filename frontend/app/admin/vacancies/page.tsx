@@ -40,8 +40,6 @@ export default function AdminVacanciesPage() {
     }
   };
 
-  if (isLoading) return <p className="p-6">Loading...</p>;
-
   return (
     <>
       <Navbar />
@@ -71,6 +69,10 @@ export default function AdminVacanciesPage() {
         </aside>
 
         <section className="flex-1 p-8">
+          
+          {isLoading && (
+            <p className="mb-4 text-sm text-gray-400">Loading...</p>
+          )}
           <div className="mb-6 flex items-center justify-between">
             <h1 className="text-xl font-bold">Lowongan Saya</h1>
             <Link
@@ -98,11 +100,9 @@ export default function AdminVacanciesPage() {
                 </div>
 
                 <div className="flex-1">
-                  <Link href={`/admin/vacancies/detail/${job.id}`}>
-                    <h3 className="font-semibold hover:underline cursor-pointer">
+                    <h3 className="font-semibold">
                       {job.title}
                     </h3>
-                  </Link>
                   <p className="mt-1 text-xs text-gray-500">
                     Dibuat: {job.created_at} · Aktif hingga: {job.active_until}
                   </p>

@@ -7,6 +7,7 @@ use App\Http\Requests\VacancyRequest;
 use App\Http\Resources\VacancyResource;
 use App\Services\VacancyService;
 use App\Traits\ApiResponse;
+use Illuminate\Http\Request;
 
 class VacancyController extends Controller
 {
@@ -20,6 +21,22 @@ class VacancyController extends Controller
         return $this->successResponse(
             VacancyResource::collection($vacancies),
             'Data berhasil diambil'
+        );
+    }
+
+    public function search(Request $request)
+    {
+        $keyword = $request->query('search');
+
+        if (!$keyword) {
+            return $this->index();
+        }
+
+        $vacancies = $this->service->search($keyword);
+
+        return $this->successResponse(
+            VacancyResource::collection($vacancies),
+            'Hasil pencarian'
         );
     }
 

@@ -12,6 +12,11 @@ class VacancyService
         return $this->repository->getAll();
     }
 
+    public function search(string $keyword)
+    {
+        return $this->repository->search($keyword);
+    }
+
     public function create(array $data)
     {
         return $this->repository->create($data);

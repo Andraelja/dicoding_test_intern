@@ -1,28 +1,37 @@
 "use client";
 
+import { useState } from "react";
+import { useDebounce } from "use-debounce";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Image from "next/image";
 import { api } from "@/lib/api";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Search, MapPin, Briefcase, Building2 } from "lucide-react";
+import Link from "next/link";
 
 const fetchVacancies = async () => {
   const res = await api.get("/vacancies");
   return res.data.data;
 };
 
-export default function JobsPage() {
-  const {
-    data = [],
-    isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ["admin-jobs"],
-    queryFn: fetchVacancies,
+const fetchVacanciesSearch = async (keyword: string) => {
+  const res = await api.get("/vacancies/search", {
+    params: { search: keyword },
   });
+  return res.data.data;
+};
 
-  if (isLoading) return <p className="p-6">Loading...</p>;
+export default function JobsPage() {
+  const [search, setSearch] = useState("");
+  const [debouncedSearch] = useDebounce(search, 400);
+  const { data = [], isLoading } = useQuery({
+    queryKey: ["admin-jobs", debouncedSearch],
+    queryFn: () =>
+      debouncedSearch
+        ? fetchVacanciesSearch(debouncedSearch)
+        : fetchVacancies(),
+  });
 
   return (
     <>
@@ -55,6 +64,9 @@ export default function JobsPage() {
             <div className="mx-auto max-w-3xl">
               <div className="mb-6 flex items-end justify-between">
                 <h4 className="text-lg font-semibold">
+                  {isLoading && (
+                    <p className="mb-4 text-sm text-gray-400">Mencari...</p>
+                  )}
                   Daftar Pekerjaan Terbaru
                 </h4>
 
@@ -65,6 +77,8 @@ export default function JobsPage() {
                   />
                   <input
                     type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
                     placeholder="Pekerjaan apa yang sedang kamu cari?"
                     className="w-full rounded-lg border border-secondary px-9 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -83,10 +97,12 @@ export default function JobsPage() {
 
                     <div className="flex w-full justify-between gap-6">
                       <div className="min-w-0">
-                        <h3 className="truncate font-semibold text-sm">
-                          {job.title}
-                        </h3>
-
+                        
+                  <Link href={`/admin/vacancies/detail/${job.id}`}>
+                    <h3 className="font-semibold hover:underline cursor-pointer">
+                      {job.title}
+                    </h3>
+                  </Link>
                         <div className="mt-1 flex items-center gap-2 text-sm text-gray-600">
                           <Building2 size={14} className="shrink-0" />
                           <span>Dicoding Indonesia</span>

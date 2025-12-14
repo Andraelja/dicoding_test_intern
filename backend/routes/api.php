@@ -14,6 +14,7 @@ Route::prefix('vacancies')
 ->middleware(['auth:sanctum', 'role:Admin'])
 ->group(function () {
     Route::get('/', [VacancyController::class, 'index']);
+    Route::get('/search', [VacancyController::class, 'search']);
     Route::get('{id}', [VacancyController::class, 'show']);
     Route::post('/', [VacancyController::class, 'store']);
     Route::put('/{id}', [VacancyController::class, 'update']);

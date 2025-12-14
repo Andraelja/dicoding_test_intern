@@ -9,6 +9,20 @@ class VacancyRepository
         return Vacancy::with('position')->latest()->get();
     }
 
+    public function search(string $keyword)
+    {
+        return Vacancy::with('position')
+            ->where(function ($query) use ($keyword) {
+                $query->where('title', 'like', "%{$keyword}%")
+                    ->orWhere('location', 'like', "%{$keyword}%")
+                    ->orWhereHas('position', function ($q) use ($keyword) {
+                        $q->where('name', 'like', "%{$keyword}%");
+                    });
+            })
+            ->latest()
+            ->get();
+    }
+
     public function findById(int $id) {
         return Vacancy::with('position')->findOrFail($id);
     }
