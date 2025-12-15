@@ -232,7 +232,7 @@ php artisan test
 ### Frontend Tests
 ```bash
 cd frontend
-npm run lint
+npx playwright test
 ```
 
 ## 🚀 Deployment
