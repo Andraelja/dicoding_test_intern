@@ -5,6 +5,9 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Database\Seeders\RolesSeeder;
+use Database\Seeders\VacancySeeder;
+use Database\Seeders\PositionSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -17,9 +20,11 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            RolesSeeder::class,
+            PositionSeeder::class,
+            UserSeeder::class,
+            VacancySeeder::class,
         ]);
     }
 }

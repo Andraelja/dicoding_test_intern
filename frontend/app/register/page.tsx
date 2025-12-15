@@ -3,36 +3,30 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
-import Link from "next/link";
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleLogin = async () => {
+  const handleRegister = async () => {
     setLoading(true);
     setError("");
 
     try {
-      const res = await api.post("/login", {
+      await api.post("/register", {
+        name,
         email,
         password,
+        role_id: 2,
       });
-      const { token, user } = res.data;
 
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
-
-      if (user.role_id === 2) {
-        router.push("/jobs");
-      } else {
-        router.push("/admin/vacancies");
-      }
+      router.push("/login");
     } catch (err: any) {
-      setError(err.response?.data?.message || "Login gagal");
+      setError(err.response?.data?.message || "Register gagal");
     } finally {
       setLoading(false);
     }
@@ -41,7 +35,9 @@ export default function LoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-50">
       <div className="w-full max-w-md rounded-xl border bg-white p-6">
-        <h1 className="mb-6 text-center text-2xl font-bold">Login Admin</h1>
+        <h1 className="mb-6 text-center text-2xl font-bold">
+          Register
+        </h1>
 
         {error && (
           <div className="mb-4 rounded bg-red-100 p-3 text-sm text-red-600">
@@ -50,6 +46,14 @@ export default function LoginPage() {
         )}
 
         <div className="space-y-4">
+          <input
+            type="text"
+            placeholder="Nama Lengkap"
+            className="w-full rounded border px-3 py-2"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+
           <input
             type="email"
             placeholder="Email"
@@ -67,21 +71,12 @@ export default function LoginPage() {
           />
 
           <button
-            onClick={handleLogin}
+            onClick={handleRegister}
             disabled={loading}
             className="w-full rounded bg-black py-2 text-white disabled:opacity-50"
           >
-            {loading ? "Loading..." : "Login"}
+            {loading ? "Loading..." : "Register"}
           </button>
-          <div className="mt-4 text-center text-sm text-gray-600">
-            Belum punya akun?{" "}
-            <Link
-              href="/register"
-              className="font-medium text-black hover:underline"
-            >
-              Daftar di sini
-            </Link>
-          </div>
         </div>
       </div>
     </main>

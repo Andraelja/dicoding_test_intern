@@ -14,7 +14,7 @@ class PositionSeeder extends Seeder
     public function run(): void
     {
         DB::table('positions')->insert([
-            ['name' => 'Engineering', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'Developer', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'Marketing', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'Human Resources', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'Finance', 'created_at' => now(), 'updated_at' => now()],
